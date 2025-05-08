@@ -41,7 +41,13 @@ ADDITIONAL_PACKAGES = [
     "xformers==0.0.29.post3",
     "opencv-python==4.8.0.76",
     "opencv-contrib-python==4.8.0.76",
-    "insightface==0.7.3",
+]
+
+# Packages to exclude (will be installed separately)
+EXCLUDED_PACKAGES = [
+    "insightface",
+    "dlib",
+    "fairscale",
 ]
 
 def parse_requirement(req_str):
@@ -80,6 +86,9 @@ def main():
             req = parse_requirement(line)
             if req:
                 name, requirement = req
+                # Skip excluded packages
+                if name in EXCLUDED_PACKAGES:
+                    continue
                 # Keep the most specific version if the package already exists
                 if name in all_requirements:
                     # For simplicity, just take the newer requirement
@@ -92,7 +101,8 @@ def main():
         req = parse_requirement(pkg)
         if req:
             name, requirement = req
-            all_requirements[name] = requirement
+            if name not in EXCLUDED_PACKAGES:
+                all_requirements[name] = requirement
     
     # Output final requirements
     with open("requirements.txt", "w") as f:
