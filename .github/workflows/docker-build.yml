@@ -1,0 +1,53 @@
+name: Build and Push ComfyUI Docker Image
+
+on:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'scripts/**'
+      - '.github/workflows/docker-build.yml'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Get ComfyUI version
+      id: comfyui_version
+      run: |
+        git clone https://github.com/comfyanonymous/ComfyUI.git temp_comfyui
+        cd temp_comfyui
+        VERSION=$(git describe --tags --abbrev=0 || echo "latest")
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        cd ..
+        rm -rf temp_comfyui
+        
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: |
+          hewenyulucky/comfyui:${{ env.VERSION }}
+          hewenyulucky/comfyui:latest
+        cache-from: type=registry,ref=hewenyulucky/comfyui:buildcache
+        cache-to: type=registry,ref=hewenyulucky/comfyui:buildcache,mode=max
+        build-args: |
+          PYTHON_VERSION=3.11
+          CUDA_VERSION=12.1 
