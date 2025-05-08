@@ -7,12 +7,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
 RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y \
     git \
     wget \
     curl \
-    python${PYTHON_VERSION} \
-    python${PYTHON_VERSION}-dev \
-    python${PYTHON_VERSION}-venv \
+    python3.11 \
+    python3.11-dev \
+    python3.11-venv \
     python3-pip \
     python3-setuptools \
     libgl1 \
@@ -27,8 +30,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python version
-RUN ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
-    ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3
+RUN ln -sf /usr/bin/python3.11 /usr/bin/python && \
+    ln -sf /usr/bin/python3.11 /usr/bin/python3
 
 # Set working directory
 WORKDIR /app
@@ -52,13 +55,13 @@ COPY scripts/gather_requirements.py /app/scripts/
 RUN mkdir -p /app/scripts
 
 # Run the requirement gathering script
-RUN cd /app && python /app/scripts/gather_requirements.py
+RUN cd /app && python3.11 /app/scripts/gather_requirements.py
 
 # Install Python dependencies
-RUN pip3 install --no-cache-dir -r /app/requirements.txt
+RUN python3.11 -m pip install --no-cache-dir -r /app/requirements.txt
 
 # Install Torch with CUDA support and xformers
-RUN pip3 install --no-cache-dir xformers==0.0.29.post3 torch==2.6.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --extra-index-url https://pypi.org/simple
+RUN python3.11 -m pip install --no-cache-dir xformers==0.0.29.post3 torch==2.6.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --extra-index-url https://pypi.org/simple
 
 # Set environment variables
 ENV PYTHONPATH=/app
@@ -78,4 +81,4 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 EXPOSE 8188
 
 # Command
-CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--enable-cors-header"] 
+CMD ["python3.11", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--enable-cors-header"] 

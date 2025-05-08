@@ -51,8 +51,8 @@ fi
 # Generate requirements file if it doesn't exist
 if [ ! -f "/app/requirements.txt" ] || [ "${REGENERATE_REQUIREMENTS:-false}" = "true" ]; then
     echo "Generating requirements.txt..."
-    python /app/scripts/gather_requirements.py
-    pip install -r /app/requirements.txt
+    python3.11 /app/scripts/gather_requirements.py
+    python3.11 -m pip install -r /app/requirements.txt
 fi
 
 # Run user-provided init script if it exists
