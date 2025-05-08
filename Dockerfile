@@ -1,6 +1,6 @@
 ARG PYTHON_VERSION=3.11
-ARG CUDA_VERSION=12.1
-FROM nvidia/cuda:${CUDA_VERSION}.0-devel-debian11
+ARG CUDA_VERSION=12.9.0
+FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04
 
 # Set non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -57,8 +57,8 @@ RUN cd /app && python /app/scripts/gather_requirements.py
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r /app/requirements.txt
 
-# Install Torch with CUDA support
-RUN pip3 install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
+# Install Torch with CUDA support and xformers
+RUN pip3 install --no-cache-dir xformers==0.0.29.post3 torch==2.6.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 --extra-index-url https://pypi.org/simple
 
 # Set environment variables
 ENV PYTHONPATH=/app

@@ -35,9 +35,10 @@ REPO_REQUIREMENTS = [
 
 # Additional packages that might be needed
 ADDITIONAL_PACKAGES = [
-    "torch==2.1.0",
-    "torchvision==0.16.0",
-    "torchaudio==2.1.0",
+    "torch==2.6.0",
+    "torchvision",
+    "torchaudio",
+    "xformers==0.0.29.post3",
     "opencv-python==4.8.0.76",
     "opencv-contrib-python==4.8.0.76",
     "insightface==0.7.3",

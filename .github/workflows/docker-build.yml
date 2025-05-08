@@ -50,4 +50,4 @@ jobs:
         cache-to: type=registry,ref=hewenyulucky/comfyui:buildcache,mode=max
         build-args: |
           PYTHON_VERSION=3.11
-          CUDA_VERSION=12.1 
+          CUDA_VERSION=12.9.0 
