@@ -97,9 +97,10 @@ If you encounter issues with specific packages:
 The GitHub Actions workflow in this repository will:
 
 1. Trigger on manual dispatch, weekly schedule, or when changes are pushed to the main branch
-2. Build the Docker image with necessary dependencies
-3. Get the latest ComfyUI version
-4. Push the image to Docker Hub with the ComfyUI version and 'latest' tags
+2. Run on a self-hosted runner (VM-12-10-debian)
+3. Build the Docker image with necessary dependencies
+4. Get the latest ComfyUI version
+5. Push the image to Docker Hub with the ComfyUI version and 'latest' tags
 
 ## License
 
