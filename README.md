@@ -4,8 +4,8 @@ This repository contains a GitHub Actions workflow and scripts to automatically 
 
 ## Features
 
-- Uses Debian as the base image
-- Python 3.11 and CUDA 12.1 support
+- Uses Ubuntu 22.04 as the base image
+- Python 3.11 and CUDA 12.9.0 support
 - Automatic versioning using ComfyUI's version as the tag
 - Installs popular custom nodes:
   - ComfyUI-Manager
@@ -16,6 +16,7 @@ This repository contains a GitHub Actions workflow and scripts to automatically 
   - ComfyUI_Comfyroll_CustomNodes
   - rgthree-comfy
 - Automatically detects and installs dependencies from all custom nodes
+- Robust package installation with fallback mechanisms for problematic packages
 - Scripts for automatic package deduplication and installation
 
 ## Docker Images
@@ -74,12 +75,29 @@ cd ComfyUI-Docker
 docker build -t comfyui:local .
 ```
 
+## Package Installation Strategy
+
+The Docker image uses a sophisticated approach to handle package installation:
+
+1. Installs PyTorch and xformers first with CUDA 12.4 support
+2. Uses a custom installation script for problematic packages (insightface, dlib, fairscale)
+3. Implements multiple fallback methods for package installation
+4. Continues the build process even if some non-critical packages fail to install
+
+## Troubleshooting
+
+If you encounter issues with specific packages:
+
+1. Try running the container with the `REGENERATE_REQUIREMENTS=true` environment variable
+2. Check if the problematic package is listed in `scripts/problematic_requirements.txt`
+3. For custom node compatibility issues, update the container with `UPDATE_REPOSITORIES=true`
+
 ## GitHub Actions Workflow
 
 The GitHub Actions workflow in this repository will:
 
 1. Trigger on manual dispatch, weekly schedule, or when changes are pushed to the main branch
-2. Build the Docker image
+2. Build the Docker image with necessary dependencies
 3. Get the latest ComfyUI version
 4. Push the image to Docker Hub with the ComfyUI version and 'latest' tags
 
