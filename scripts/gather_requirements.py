@@ -41,6 +41,7 @@ ADDITIONAL_PACKAGES = [
     "xformers==0.0.29.post3",
     "opencv-python==4.8.0.76",
     "opencv-contrib-python==4.8.0.76",
+    "sageattention==1.0.6",
 ]
 
 # Packages to exclude (will be installed separately)
