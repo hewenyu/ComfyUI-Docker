@@ -63,7 +63,7 @@ RUN mkdir -p /app/custom_nodes && \
     git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
     git clone https://github.com/FizzleDorf/ComfyUI_FizzNodes.git && \
     git clone https://github.com/Gourieff/ComfyUI-ReActor.git && \
-    git clone https://github.com/huchenlei/ComfyUI-layerdiffuser.git && \
+    git clone https://github.com/huchenlei/ComfyUI-layerdiffuse.git && \
     git clone https://github.com/jags111/efficiency-nodes-comfyui.git && \
     git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git && \
     git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git && \
