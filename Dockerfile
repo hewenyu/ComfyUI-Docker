@@ -76,7 +76,8 @@ RUN mkdir -p /app/custom_nodes && \
     git clone https://github.com/shadowcz007/comfyui-mixlab-nodes.git && \
     git clone https://github.com/yolain/ComfyUI-Easy-Use.git && \
     git clone https://github.com/kijai/ComfyUI-IC-Light.git && \
-    git clone https://github.com/siliconflow/BizyAir.git
+    git clone https://github.com/siliconflow/BizyAir.git && \
+    git clone https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git
 
 # Copy scripts
 COPY scripts/gather_requirements.py /app/scripts/
