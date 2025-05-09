@@ -37,6 +37,7 @@ REPO_REQUIREMENTS = [
     "https://github.com/yolain/ComfyUI-Easy-Use/raw/main/requirements.txt",
     "https://github.com/kijai/ComfyUI-IC-Light/raw/main/requirements.txt",
     "https://github.com/siliconflow/BizyAir/raw/master/requirements.txt",
+    "https://github.com/lldacing/comfyui-easyapi-nodes/raw/master/requirements.txt",
 ]
 
 # Additional packages that might be needed
@@ -48,6 +49,7 @@ ADDITIONAL_PACKAGES = [
     "opencv-python==4.8.0.76",
     "opencv-contrib-python==4.8.0.76",
     "sageattention==1.0.6",
+    "bizyengine==1.2.4",
 ]
 
 # Packages to exclude (will be installed separately)
