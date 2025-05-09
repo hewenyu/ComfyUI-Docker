@@ -72,7 +72,11 @@ RUN mkdir -p /app/custom_nodes && \
     git clone https://github.com/storyicon/comfyui_segment_anything.git && \
     git clone https://github.com/WASasquatch/was-node-suite-comfyui.git && \
     git clone https://github.com/chflame163/ComfyUI_LayerStyle.git && \
-    git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance.git
+    git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance.git && \
+    git clone https://github.com/shadowcz007/comfyui-mixlab-nodes.git && \
+    git clone https://github.com/yolain/ComfyUI-Easy-Use.git && \
+    git clone https://github.com/kijai/ComfyUI-IC-Light.git && \
+    git clone https://github.com/siliconflow/BizyAir.git
 
 # Copy scripts
 COPY scripts/gather_requirements.py /app/scripts/
