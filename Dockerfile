@@ -54,7 +54,25 @@ RUN mkdir -p /app/custom_nodes && \
     git clone https://github.com/cubiq/ComfyUI_essentials.git && \
     git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
     git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git && \
-    git clone https://github.com/rgthree/rgthree-comfy.git
+    git clone https://github.com/rgthree/rgthree-comfy.git && \
+    git clone https://github.com/crystian/ComfyUI-Crystools.git && \
+    git clone https://github.com/cubiq/ComfyUI_FaceAnalysis.git && \
+    git clone https://github.com/cubiq/ComfyUI_InstantID.git && \
+    git clone https://github.com/cubiq/PuLID_ComfyUI.git && \
+    git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git && \
+    git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git && \
+    git clone https://github.com/FizzleDorf/ComfyUI_FizzNodes.git && \
+    git clone https://github.com/Gourieff/ComfyUI-ReActor.git && \
+    git clone https://github.com/huchenlei/ComfyUI-layerdiffuser.git && \
+    git clone https://github.com/jags111/efficiency-nodes-comfyui.git && \
+    git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git && \
+    git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack.git && \
+    git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git && \
+    git clone https://github.com/melMass/comfy_mtb.git && \
+    git clone https://github.com/storyicon/comfyui_segment_anything.git && \
+    git clone https://github.com/WASasquatch/was-node-suite-comfyui.git && \
+    git clone https://github.com/chflame163/ComfyUI_LayerStyle.git && \
+    git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance.git
 
 # Copy scripts
 COPY scripts/gather_requirements.py /app/scripts/

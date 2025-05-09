@@ -31,6 +31,8 @@ REPO_REQUIREMENTS = [
     "https://github.com/storyicon/comfyui_segment_anything/raw/main/requirements.txt",
     "https://github.com/WASasquatch/was-node-suite-comfyui/raw/main/requirements.txt",
     "https://github.com/kijai/ComfyUI-WanVideoWrapper/raw/main/requirements.txt",
+    "https://github.com/chflame163/ComfyUI_LayerStyle/raw/main/requirements.txt",
+    "https://github.com/chflame163/ComfyUI_LayerStyle_Advance/raw/main/requirements.txt",
 ]
 
 # Additional packages that might be needed
