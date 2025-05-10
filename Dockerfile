@@ -1,5 +1,6 @@
 ARG PYTHON_VERSION=3.11
 ARG CUDA_VERSION=12.9.0
+ARG BUILD_TYPE=default
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu22.04
 
 # Set non-interactive installation
@@ -80,6 +81,11 @@ RUN mkdir -p /app/custom_nodes && \
     git clone https://github.com/lquesada/ComfyUI-Inpaint-CropAndStitch.git && \
     git clone https://github.com/lldacing/comfyui-easyapi-nodes.git
 
+# Replace GitHub raw URLs in custom nodes for China builds
+RUN if [ "$BUILD_TYPE" = "cn" ]; then \
+    find /app/custom_nodes -type f -name "*.py" -o -name "*.json" -o -name "*.yaml" -o -name "*.yml" | xargs sed -i 's|https://raw.githubusercontent.com|https://gh-proxy.com/https://raw.githubusercontent.com|g'; \
+    fi
+
 # Copy scripts
 COPY scripts/gather_requirements.py /app/scripts/
 COPY scripts/problematic_requirements.txt /app/scripts/
@@ -106,6 +112,11 @@ RUN chmod +x /app/entrypoint.sh
 
 # Create directories for models and outputs
 RUN mkdir -p /app/models /app/output
+
+# Set pip mirror for China builds
+RUN if [ "$BUILD_TYPE" = "cn" ]; then \
+        pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple; \
+    fi
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
