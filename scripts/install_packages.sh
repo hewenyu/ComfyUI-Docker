@@ -1,48 +1,56 @@
 #!/bin/bash
 set -e
 
-echo "Upgrading pip and installing wheel and setuptools..."
+echo "升级 pip 并安装 wheel 和 setuptools..."
 python3.11 -m pip install --no-cache-dir --upgrade pip
 python3.11 -m pip install --no-cache-dir wheel setuptools
 
-# Function to install a package with multiple fallback methods
+# 安装包的函数，包含多种回退方法
 install_package() {
     local package=$1
     local version=$2
     
-    echo "Trying to install $package==$version..."
+    echo "尝试安装 $package==$version..."
     
-    # Try method 1: Install from binary wheel
-    echo "Method 1: Installing $package==$version from binary wheel..."
-    python3.11 -m pip install --no-cache-dir "$package==$version" --only-binary=:all: && return 0
+    # 尝试多种安装方法
+    for method in \
+        "--only-binary=:all:" \
+        "--no-build-isolation" \
+        "--no-deps"; do
+        echo "方法: pip install $method $package==$version"
+        if python3.11 -m pip install --no-cache-dir $method "$package==$version"; then
+            echo "成功安装 $package==$version"
+            return 0
+        fi
+    done
     
-    # Try method 2: Install with no build isolation
-    echo "Method 2: Installing $package==$version with --no-build-isolation..."
-    python3.11 -m pip install --no-cache-dir --no-build-isolation "$package==$version" && return 0
-    
-    # Try method 3: Install with no dependencies
-    echo "Method 3: Installing $package==$version with --no-deps..."
-    python3.11 -m pip install --no-cache-dir --no-deps "$package==$version" && return 0
-    
-    # If all methods fail, just continue
-    echo "Warning: Failed to install $package==$version, continuing anyway..."
+    echo "警告: 无法安装 $package==$version，继续执行..."
     return 0
 }
 
-# Install problematic packages separately
-install_package "dlib" "19.24.2"
-install_package "insightface" "0.7.3"
-install_package "fairscale" "0.4.13"
+# 读取问题包列表并单独安装
+if [ -f "/app/scripts/problematic_requirements.txt" ]; then
+    echo "安装问题包..."
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        # 跳过空行和注释
+        [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue
+        
+        # 解析包名和版本
+        if [[ "$line" =~ ([^=]+)==(.+) ]]; then
+            package="${BASH_REMATCH[1]}"
+            version="${BASH_REMATCH[2]}"
+            install_package "$package" "$version"
+        fi
+    done < "/app/scripts/problematic_requirements.txt"
+fi
 
-# Try to install the main requirements
-echo "Installing main requirements..."
-# Use --no-deps for specific problematic packages
-python3.11 -m pip install --no-cache-dir --no-deps insightface==0.7.3 dlib==19.24.2 fairscale==0.4.13 || true
-python3.11 -m pip install --no-cache-dir -r /app/requirements.txt || {
-    echo "Main requirements installation failed, trying with --ignore-installed flag..."
-    python3.11 -m pip install --no-cache-dir --ignore-installed -r /app/requirements.txt || {
-        echo "Warning: Some packages failed to install, but we'll continue anyway."
-    }
-}
+# 安装主要依赖项
+echo "安装主要依赖项..."
+if ! python3.11 -m pip install --no-cache-dir -r /app/requirements.txt; then
+    echo "主要依赖项安装失败，尝试使用 --ignore-installed 标志..."
+    if ! python3.11 -m pip install --no-cache-dir --ignore-installed -r /app/requirements.txt; then
+        echo "警告: 某些包安装失败，但我们将继续执行。"
+    fi
+fi
 
-echo "Package installation completed." 
+echo "包安装完成。" 

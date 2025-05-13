@@ -1,77 +1,86 @@
 #!/bin/bash
 set -e
 
-# Make sure scripts directory exists
+# 环境变量默认值
+: "${UPDATE_REPOSITORIES:=false}"
+: "${DOWNLOAD_EXAMPLE_MODELS:=false}"
+: "${FORCE_DOWNLOAD_MODELS:=false}"
+: "${REGENERATE_REQUIREMENTS:=false}"
+: "${FIX_PERMISSIONS:=true}"
+
+# 确保脚本目录存在
 mkdir -p /app/scripts
 
-# Update ComfyUI and custom nodes if requested
-if [ "${UPDATE_REPOSITORIES:-false}" = "true" ]; then
-    echo "Updating ComfyUI..."
-    cd /app
-    git pull
+# 更新仓库函数
+update_repositories() {
+    echo "更新 ComfyUI..."
+    cd /app && git pull
 
-    echo "Updating custom nodes..."
-    for dir in /app/custom_nodes/*; do
-        if [ -d "$dir/.git" ]; then
-            echo "Updating $(basename $dir)..."
-            cd "$dir"
-            git pull
+    echo "更新自定义节点..."
+    find /app/custom_nodes -maxdepth 1 -mindepth 1 -type d -exec bash -c '
+        if [ -d "$0/.git" ]; then
+            echo "更新 $(basename $0)..."
+            cd "$0" && git pull
         fi
-    done
-fi
+    ' {} \;
+}
 
-# Download models if they don't exist or if forced
+# 下载模型函数
 download_model() {
     local model_url="$1"
     local output_dir="$2"
     local filename=$(basename "$model_url")
     
-    if [ ! -f "$output_dir/$filename" ] || [ "${FORCE_DOWNLOAD_MODELS:-false}" = "true" ]; then
-        echo "Downloading $filename to $output_dir..."
+    if [ ! -f "$output_dir/$filename" ] || [ "${FORCE_DOWNLOAD_MODELS}" = "true" ]; then
+        echo "下载 $filename 到 $output_dir..."
         mkdir -p "$output_dir"
         wget -q --show-progress -O "$output_dir/$filename" "$model_url"
     else
-        echo "Model $filename already exists, skipping download."
+        echo "模型 $filename 已存在，跳过下载。"
     fi
 }
 
-# Download example models if requested
-if [ "${DOWNLOAD_EXAMPLE_MODELS:-false}" = "true" ]; then
-    # SD 1.5 model
+# 根据环境变量执行相应操作
+if [ "${UPDATE_REPOSITORIES}" = "true" ]; then
+    update_repositories
+fi
+
+if [ "${DOWNLOAD_EXAMPLE_MODELS}" = "true" ]; then
+    # SD 1.5 模型
     download_model "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" "/app/models/checkpoints"
     
-    # Upscaler models
+    # 放大模型
     download_model "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth" "/app/models/upscale_models"
     
-    # ControlNet models
+    # ControlNet 模型
     download_model "https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_canny.pth" "/app/models/controlnet"
     download_model "https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_openpose.pth" "/app/models/controlnet"
 fi
 
-# Generate requirements file if it doesn't exist
-if [ ! -f "/app/requirements.txt" ] || [ "${REGENERATE_REQUIREMENTS:-false}" = "true" ]; then
-    echo "Generating requirements.txt..."
+# 重新生成依赖项
+if [ "${REGENERATE_REQUIREMENTS}" = "true" ]; then
+    echo "生成 requirements.txt..."
     python3.11 /app/scripts/gather_requirements.py
     python3.11 -m pip install -r /app/requirements.txt
 fi
 
-# Run user-provided init script if it exists
+# 运行用户自定义初始化脚本
 if [ -f "/app/custom_init.sh" ]; then
-    echo "Running custom initialization script..."
+    echo "运行自定义初始化脚本..."
     chmod +x /app/custom_init.sh
     /app/custom_init.sh
 fi
 
-# Set ownership of all files to the running user
-if [ "${FIX_PERMISSIONS:-true}" = "true" ]; then
-    echo "Setting proper permissions..."
+# 修复文件权限
+if [ "${FIX_PERMISSIONS}" = "true" ]; then
+    echo "设置适当的权限..."
     find /app -not -user $(id -u) -exec chown -R $(id -u):$(id -g) {} \; 2>/dev/null || true
 fi
 
 echo "==================================================="
-echo "ComfyUI is now starting. Server will be available at:"
-echo "http://localhost:8188 (if port 8188 is exposed)"
+echo "ComfyUI 正在启动。服务器将在以下地址可用："
+echo "http://localhost:8188 (如果端口 8188 已暴露)"
 echo "==================================================="
 
-# Execute CMD
+# 执行命令
 exec "$@" 
