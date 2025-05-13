@@ -45,8 +45,7 @@ jobs:
         context: .
         push: true
         tags: |
-          hewenyulucky/comfyui:${{ env.VERSION }}
-          hewenyulucky/comfyui:latest
+          hewenyulucky/comfyui:${{ env.VERSION }}-dev
         build-args: |
           PYTHON_VERSION=3.11
           CUDA_VERSION=12.4.1 
