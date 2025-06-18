@@ -17,7 +17,9 @@ ln -sf /usr/bin/python3.11 /usr/bin/python3
 
 echo "开始克隆 ComfyUI 仓库..."
 if [ ! -d "/app/.git" ]; then
-    git clone https://github.com/comfyanonymous/ComfyUI.git /app
+    git clone https://github.com/comfyanonymous/ComfyUI.git /tmp/ComfyUI
+    rsync -a /tmp/ComfyUI/ /app/
+    rm -rf /tmp/ComfyUI
 fi
 
 # 克隆所有自定义节点
