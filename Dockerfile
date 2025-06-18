@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     git \
     wget \
     curl \
+    rsync \
     python3.11 \
     python3.11-dev \
     python3.11-venv \
