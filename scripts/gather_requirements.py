@@ -19,6 +19,7 @@ ADDITIONAL_PACKAGES = [
     "opencv-contrib-python==4.8.0.76",
     "sageattention==1.0.6",
     "bizyengine==1.2.4",
+    "pyyaml",
 ]
 
 def parse_requirement(req_str):
