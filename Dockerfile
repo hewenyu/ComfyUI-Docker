@@ -98,6 +98,7 @@ RUN chmod +x /app/entrypoint.sh
 
 # Set environment variables
 ENV PATH="/app/venv/bin:$PATH"
+ENV HF_ENDPOINT=https://hf-mirror.com
 
 # Create directories for models and outputs
 RUN mkdir -p /app/models /app/output
