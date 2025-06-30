@@ -40,7 +40,7 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app
 WORKDIR /app
 
 # Create and activate virtual environment
-RUN python -m venv /app/venv
+RUN python -m venv --copies /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
 # Upgrade pip
@@ -110,4 +110,4 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 EXPOSE 8188
 
 # Command to run ComfyUI
-CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--enable-cors-header"] 
+CMD ["/app/venv/bin/python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--enable-cors-header"] 
