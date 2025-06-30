@@ -1,24 +1,8 @@
 #!/bin/bash
 set -e
 
-# Make sure scripts directory exists
-mkdir -p /app/scripts
-
-# Update ComfyUI and custom nodes if requested
-if [ "${UPDATE_REPOSITORIES:-false}" = "true" ]; then
-    echo "Updating ComfyUI..."
-    cd /app
-    git pull
-
-    echo "Updating custom nodes..."
-    for dir in /app/custom_nodes/*; do
-        if [ -d "$dir/.git" ]; then
-            echo "Updating $(basename $dir)..."
-            cd "$dir"
-            git pull
-        fi
-    done
-fi
+# This script is the entrypoint for the Docker container.
+# It handles downloading models and then executes the main command.
 
 # Download models if they don't exist or if forced
 download_model() {
@@ -48,13 +32,6 @@ if [ "${DOWNLOAD_EXAMPLE_MODELS:-false}" = "true" ]; then
     download_model "https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_openpose.pth" "/app/models/controlnet"
 fi
 
-# Generate requirements file if it doesn't exist
-if [ ! -f "/app/requirements.txt" ] || [ "${REGENERATE_REQUIREMENTS:-false}" = "true" ]; then
-    echo "Generating requirements.txt..."
-    python3.11 /app/scripts/gather_requirements.py
-    python3.11 -m pip install -r /app/requirements.txt
-fi
-
 # Run user-provided init script if it exists
 if [ -f "/app/custom_init.sh" ]; then
     echo "Running custom initialization script..."
@@ -65,6 +42,7 @@ fi
 # Set ownership of all files to the running user
 if [ "${FIX_PERMISSIONS:-true}" = "true" ]; then
     echo "Setting proper permissions..."
+    # Use find to avoid issues with large number of files
     find /app -not -user $(id -u) -exec chown -R $(id -u):$(id -g) {} \; 2>/dev/null || true
 fi
 
