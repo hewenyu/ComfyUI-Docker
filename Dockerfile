@@ -35,15 +35,15 @@ RUN ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 WORKDIR /app
 
-# Create and activate virtual environment
-RUN python -m venv /app/venv
+# Clone ComfyUI first, into the current directory
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git .
+
+# Create and activate virtual environment inside the app directory
+RUN python -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
 
-# Upgrade pip
+# Upgrade pip inside the venv
 RUN pip install --upgrade pip
-
-# Clone ComfyUI
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app
 
 # Copy custom node list and installation scripts
 COPY custom_nodes.txt /app/
