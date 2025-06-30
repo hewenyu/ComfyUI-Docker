@@ -119,6 +119,9 @@ def main():
     output_path = os.path.join(APP_ROOT, "requirements.txt")
     with open(output_path, "w") as f:
         for name in sorted(all_requirements.keys()):
+            # 忽略 pathlib 这个包，因为它是 python 自带的
+            if name == "pathlib":
+                continue
             f.write(f"{all_requirements[name]}\n")
     
     print(f"Successfully gathered {len(all_requirements)} packages in {output_path}", file=sys.stderr)
