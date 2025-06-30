@@ -33,16 +33,17 @@ RUN apt-get update && apt-get install -y \
 RUN ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
     ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3
 
+# Clone ComfyUI repository to /app
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app
+
+# Set working directory
 WORKDIR /app
 
-# Clone ComfyUI first, into the current directory
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git .
-
-# Create and activate virtual environment inside the app directory
-RUN python -m venv venv
+# Create and activate virtual environment
+RUN python -m venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
-# Upgrade pip inside the venv
+# Upgrade pip
 RUN pip install --upgrade pip
 
 # Copy custom node list and installation scripts
