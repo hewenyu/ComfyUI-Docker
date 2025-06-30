@@ -7,6 +7,7 @@ import pkg_resources
 # Base directory for the application
 APP_ROOT = "/app"
 CUSTOM_NODES_DIR = os.path.join(APP_ROOT, "custom_nodes")
+SCRIPTS_DIR = os.path.join(APP_ROOT, "scripts")
 
 # Additional packages that might be needed
 ADDITIONAL_PACKAGES = [
@@ -18,16 +19,6 @@ ADDITIONAL_PACKAGES = [
     "opencv-contrib-python==4.8.0.76",
     "sageattention==1.0.6",
     "bizyengine==1.2.4",
-]
-
-# Packages to exclude (will be installed separately or are problematic)
-# install_package "dlib" "19.24.2"
-# install_package "insightface" "0.7.3"
-# install_package "fairscale" "0.4.13"
-EXCLUDED_PACKAGES = [
-    "insightface==0.7.3",
-    "dlib==19.24.2",
-    "fairscale==0.4.13",
 ]
 
 def parse_requirement(req_str):
@@ -78,6 +69,20 @@ def find_requirements_files(start_dir):
 def main():
     all_requirements = {}
     
+    # Load problematic packages to exclude them from the main requirements file
+    excluded_packages = []
+    problematic_req_path = os.path.join(SCRIPTS_DIR, "problematic_requirements.txt")
+    try:
+        with open(problematic_req_path, 'r') as f:
+            for line in f:
+                req = parse_requirement(line)
+                if req:
+                    name, _ = req
+                    excluded_packages.append(name)
+        print(f"Loaded {len(excluded_packages)} problematic packages to exclude.", file=sys.stderr)
+    except FileNotFoundError:
+        print("Warning: problematic_requirements.txt not found. No packages will be specially excluded.", file=sys.stderr)
+    
     # Find all local requirements files
     req_files = find_requirements_files(CUSTOM_NODES_DIR)
     
@@ -92,7 +97,7 @@ def main():
                     req = parse_requirement(line)
                     if req:
                         name, requirement = req
-                        if name in EXCLUDED_PACKAGES:
+                        if name in excluded_packages:
                             continue
                         # A simple policy: the first one parsed wins.
                         # Dockerfile installs torch/xformers first, so custom reqs can't override them.
@@ -107,7 +112,7 @@ def main():
         req = parse_requirement(pkg)
         if req:
             name, requirement = req
-            if name not in EXCLUDED_PACKAGES and name not in all_requirements:
+            if name not in excluded_packages and name not in all_requirements:
                 all_requirements[name] = requirement
     
     # Output final requirements
