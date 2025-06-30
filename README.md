@@ -1,107 +1,116 @@
-# ComfyUI Docker Build System
+# ComfyUI Docker (中文版)
 
-This repository contains a GitHub Actions workflow and scripts to automatically build and publish a comprehensive ComfyUI Docker image with various popular custom nodes pre-installed.
+这是一个经过优化的 Docker 项目，用于运行 [ComfyUI](https://github.com/comfyanonymous/ComfyUI)。它通过将自定义节点列表外部化管理，并采用多阶段构建，提供了一个灵活、高效且易于维护的 ComfyUI 环境。
 
-## Features
+## ✨ 特性
 
-- Uses Ubuntu 22.04 as the base image
-- Python 3.11 and CUDA 12.9.0 support
-- Automatic versioning using ComfyUI's version as the tag
-- Installs popular custom nodes:
-  - ComfyUI-Manager
-  - ComfyUI-WanVideoWrapper
-  - ComfyUI-KJNodes
-  - ComfyUI_essentials
-  - ComfyUI-VideoHelperSuite
-  - ComfyUI_Comfyroll_CustomNodes
-  - rgthree-comfy
-- Automatically detects and installs dependencies from all custom nodes
-- Robust package installation with fallback mechanisms for problematic packages
-- Scripts for automatic package deduplication and installation
+- **动态节点管理**: 只需修改 `custom_nodes.txt` 文件即可轻松添加或移除自定义节点，无需重建整个基础环境。
+- **多阶段构建**: 使用 Docker 的多阶段构建功能，分离了构建环境和运行时环境，显著减小了最终镜像的体积。
+- **依赖自动解析**: 自动扫描所有自定义节点下的 `requirements.txt` 文件，并整合所有 Python 依赖。
+- **配置集中化**: 对"问题依赖包"的管理同样通过 `scripts/problematic_requirements.txt` 文件进行，避免了硬编码。
+- **易于部署**: 提供了 `docker-compose.yml`，一键即可启动和管理服务。
+- **国内用户优化**: 内置 `HF_ENDPOINT` 环境变量，方便用户切换到 Hugging Face 国内镜像源。
 
-## Docker Images
+## 🚀 快速开始
 
-The Docker images are published to [Docker Hub](https://hub.docker.com/r/hewenyulucky/comfyui) with the following tags:
+我们强烈推荐使用 Docker Compose 来管理此应用。
 
-- `hewenyulucky/comfyui:latest` - Latest build
-- `hewenyulucky/comfyui:<version>` - Specific ComfyUI version
+### 1. 先决条件
 
-## Usage
+- [Docker](https://www.docker.com/get-started)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) (用于 GPU 支持)
+- `docker-compose` (通常随 Docker Desktop 一同安装)
 
-### Basic Usage
+### 2. 准备目录
+
+在您的主机上创建 `models` 和 `output` 目录，用于持久化存储数据。
 
 ```bash
-docker run -it --gpus all -p 8188:8188 -v /path/to/models:/app/models hewenyulucky/comfyui:latest
+mkdir models
+mkdir output
 ```
 
-### With Persistent Storage
+### 3. 配置 (可选)
+
+- **自定义节点**: 编辑 `custom_nodes.txt` 文件，添加或删除您需要的 ComfyUI 自定义节点的 Git 仓库 URL。
+- **Hugging Face 镜像**: 如果您在中国大陆，建议创建一个 `.env` 文件来配置 Hugging Face 镜像，以加速模型下载。
+
+  ```bash
+  # .env 文件内容
+  HF_ENDPOINT=https://hf-mirror.com
+  ```
+  `docker-compose` 会自动加载此文件。
+
+### 4. 构建并启动
+
+在项目根目录下运行以下命令：
 
 ```bash
-docker run -it --gpus all \
+docker-compose up --build
+```
+
+此命令会：
+1.  构建 Docker 镜像 (如果尚未构建或有改动)。
+2.  创建并启动 `comfyui` 服务容器。
+3.  将本地的 `models` 和 `output` 目录挂载到容器中。
+
+服务启动后，您可以通过浏览器访问 `http://localhost:8188` 来使用 ComfyUI。
+
+### 5. 停止服务
+
+```bash
+docker-compose down
+```
+
+## 📁 目录结构
+
+```
+.
+├── Dockerfile                  # 核心构建文件
+├── docker-compose.yml          # Docker Compose 配置文件
+├── custom_nodes.txt            # 自定义节点 Git 仓库列表
+├── entrypoint.sh               # 容器入口脚本
+├── README.md                   # 本文档
+└── scripts/
+    ├── gather_requirements.py      # 自动收集 Python 依赖
+    ├── install_custom_nodes.sh     # 安装 custom_nodes.txt 中定义的节点
+    ├── install_packages.sh         # 安装所有 Python 依赖
+    └── problematic_requirements.txt # 需要特殊处理的依赖列表
+```
+
+## 🛠️ 手动构建与运行 (不使用 Compose)
+
+### 构建镜像
+
+```bash
+docker build -t comfyui-docker .
+```
+
+### 运行容器
+
+```bash
+docker run -d --gpus all \
   -p 8188:8188 \
-  -v /path/to/models:/app/models \
-  -v /path/to/outputs:/app/output \
-  hewenyulucky/comfyui:latest
+  -e HF_ENDPOINT=https://hf-mirror.com \
+  -v $(pwd)/models:/app/models \
+  -v $(pwd)/output:/app/output \
+  --name comfyui-docker \
+  comfyui-docker
 ```
 
-### Environment Variables
+## 环境变量
 
-The container supports the following environment variables:
+您可以通过 `docker-compose.yml` 或 `docker run` 的 `-e` 参数来设置以下环境变量：
 
-- `UPDATE_REPOSITORIES` (default: "false") - Update ComfyUI and custom nodes on startup
-- `DOWNLOAD_EXAMPLE_MODELS` (default: "false") - Download basic example models if they don't exist
-- `FORCE_DOWNLOAD_MODELS` (default: "false") - Force download of example models even if they exist
-- `REGENERATE_REQUIREMENTS` (default: "false") - Force regeneration of requirements.txt and reinstall
-- `FIX_PERMISSIONS` (default: "true") - Fix permissions of all files on startup
+| 变量                    | 描述                                                               | 默认值                       |
+| ----------------------- | ------------------------------------------------------------------ | ---------------------------- |
+| `HF_ENDPOINT`           | Hugging Face 端点，可用于配置国内镜像。                            | `https://huggingface.co`     |
+| `DOWNLOAD_EXAMPLE_MODELS` | 是否在首次启动时下载官方示例模型。                                 | `true`                       |
+| `FORCE_DOWNLOAD_MODELS` | 是否强制重新下载模型，即时本地已存在。                             | `false`                      |
+| `FIX_PERMISSIONS`       | 是否在启动时修复 `/app` 目录的文件权限。                           | `true`                       |
 
-Example:
+## 高级用法
 
-```bash
-docker run -it --gpus all \
-  -p 8188:8188 \
-  -e UPDATE_REPOSITORIES=true \
-  -e DOWNLOAD_EXAMPLE_MODELS=true \
-  -v /path/to/models:/app/models \
-  hewenyulucky/comfyui:latest
-```
+### 自定义启动脚本
 
-## Building Locally
-
-To build the Docker image locally:
-
-```bash
-git clone https://github.com/yourusername/ComfyUI-Docker.git
-cd ComfyUI-Docker
-docker build -t comfyui:local .
-```
-
-## Package Installation Strategy
-
-The Docker image uses a sophisticated approach to handle package installation:
-
-1. Installs PyTorch and xformers first with CUDA 12.4 support
-2. Uses a custom installation script for problematic packages (insightface, dlib, fairscale)
-3. Implements multiple fallback methods for package installation
-4. Continues the build process even if some non-critical packages fail to install
-
-## Troubleshooting
-
-If you encounter issues with specific packages:
-
-1. Try running the container with the `REGENERATE_REQUIREMENTS=true` environment variable
-2. Check if the problematic package is listed in `scripts/problematic_requirements.txt`
-3. For custom node compatibility issues, update the container with `UPDATE_REPOSITORIES=true`
-
-## GitHub Actions Workflow
-
-The GitHub Actions workflow in this repository will:
-
-1. Trigger on manual dispatch, weekly schedule, or when changes are pushed to the main branch
-2. Run on a self-hosted runner (VM-12-10-debian)
-3. Build the Docker image with necessary dependencies
-4. Get the latest ComfyUI version
-5. Push the image to Docker Hub with the ComfyUI version and 'latest' tags
-
-## License
-
-See the [LICENSE](LICENSE) file for details. 
+如果您有更复杂的启动前准备工作（例如，下载特定模型到特定子目录），可以创建一个 `custom_init.sh` 脚本，然后取消 `docker-compose.yml` 中对应的 volumes 注释。`entrypoint.sh` 会在启动 ComfyUI 主程序前自动执行此脚本。 

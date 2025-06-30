@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  comfyui:
+    build:
+      context: .
+      args:
+        PYTHON_VERSION: 3.11
+        CUDA_VERSION: 12.9.0
+    container_name: comfyui-docker
+    ports:
+      - "8188:8188"
+    volumes:
+      - ./models:/app/models
+      - ./output:/app/output
+      # - ./custom_init.sh:/app/custom_init.sh # 可选：用于用户自定义的启动脚本
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - HF_ENDPOINT=${HF_ENDPOINT:-https://huggingface.co} # 使用镜像, 例如 https://hf-mirror.com
+      - DOWNLOAD_EXAMPLE_MODELS=true # 设置为 false 如果你不想下载示例模型
+      - FORCE_DOWNLOAD_MODELS=false # 设置为 true 以强制重新下载模型
+      - FIX_PERMISSIONS=true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped 
